@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 具体的には、Web of ScienceのArticle Influence Scoreに基づいて経済学の査読誌をTop20、Top50、Top100、Top200に分類した上で、各教員の各ランクの査読誌への論文の掲載数を計算、これを部局ごとに平均や中央値で評価しています。ここでは「掲載数」は著者数で割った値として定義されていることに注意してください。例えば、ある教員がTop20のジャーナルに論文を掲載して、その著者数が2だった場合は、0.5とカウントされます。Top20のスコアが1.5だった場合、2006-2015年のあいだにTop 20のジャーナルに掲載した論文の1/著者数の和が1.5になっている、ということになります。その結果が以下の表です：
 
 <center>
-![阪大論文p.6より](blog_post_20170220_files/table_handai.png)
+![阪大論文p.6より](../knitr_files/blog_post_20170220_files/table_handai.png)
 </center>
 
 なんとTop 200の査読誌に至ってもなお対象となった14部局のうち11の部局において、論文掲載数が0になっています。この結果を受けて河野氏は次のように書いています：
@@ -58,13 +58,13 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 ここには48名の教員が掲載されています。阪大論文では一橋大学経済学研究科の対象教員は42名となっています。この48名の教員の中には語学・数学系教員、公共政策に関する実務的な教育のための教員、伝統的な歴史研究に従事する教員、マルクス経済学を研究する教員、留学生のメンターなど、「近経教員」と同じ業績基準で評価するのが適切ではない教員が多数含まれています。
 
-**そうした「非近経教員」をのぞいてみたところ対象教員数は28名となりました。阪大論文の42名はずいぶんと多様な教員を含んだ数字だったようです。**ここでは「近経教員」をかなり広く取っています。計算に用いたデータとコードはGitHubに公開されているので、頑健性を確認されたい方はそちらを用いてください。東京大学の経済学研究科についても同じような計算を[Unrepresentative Agent さんがブログで試みています](http://unrepresentativeagent.blogspot.jp/2017/01/why-median-person-at-tokyo-university.html)が、ここでもHPに記載されている64名の教員中「近経教員」と呼べるのは38名程度ではないかと結論づけています。
+**そうした「非近経教員」をのぞいてみたところ対象教員数は28名となりました。阪大論文の42名はずいぶんと多様な教員を含んだ数字だったようです。**ここでは「近経教員」をかなり広く取っています。計算に必要なデータとコードもGitHubで公開してあるので、頑健性を確認されたい方はそちらを利用してください。東京大学の経済学研究科についても同じような計算を[Unrepresentative Agent さんがブログで試みています](http://unrepresentativeagent.blogspot.jp/2017/01/why-median-person-at-tokyo-university.html)が、ここでもHPに記載されている64名の教員中「近経教員」と呼べるのは38名程度ではないかと結論づけています。
 
 ```{r}
 # import journal rank data
-journal_ranks <- readr::read_csv("blog_post_20170220_files/journal_ranks.csv")
+journal_ranks <- readr::read_csv("../knitr_files/blog_post_20170220_files/journal_ranks.csv")
 # import Hitotsubashi faculty data
-data <- readr::read_csv("blog_post_20170220_files/hitotubashi_contributions.csv",
+data <- readr::read_csv("../knitr_files/blog_post_20170220_files/hitotubashi_contributions.csv",
                         locale = readr::locale(encoding = "cp932"))
 # filter mainstream faculty
 data <- dplyr::group_by(data, name) %>%
@@ -193,7 +193,7 @@ htmlTable(
 
 <center>
 ```{r, results = "asis"}
-table_stateuniversities <- readr::read_csv("blog_post_20170220_files/stateuniversities_contributions.csv",
+table_stateuniversities <- readr::read_csv("../knitr_files/blog_post_20170220_files/stateuniversities_contributions.csv",
                                            col_names = FALSE)
 table_stateuniversities <- t(table_stateuniversities)
 colnames(table_stateuniversities) <- c("UW-Madison", "OSU", "UMN", "UC Berkley")
