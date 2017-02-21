@@ -192,7 +192,7 @@ htmlTable(
  
 このように対象教員をどう取るかによって論文掲載数も大学間の順位も微妙に変化しますが、**阪大論文の対象となっている国立大学の経済学研究科の業績なんて正直言って五十歩百歩です。**国内の大学の業績を比較したところで大した政策的含意は出てきません。経済学はきわめてグローバル化された学問分野です。業績でも、採用市場でも、競合しているのは海外の大学です。政策的にも経営戦略的にも国内の大学との比較よりも海外との大学の比較のほうがよっぽど重要です。
 
-では海外の、とくに、経済学の本場である米国でのスコアはどのようなものになっているのでしょうか？ここで<a href="https://twitter.com/inoakio/status/824851699042918401" target="_blank">米国経済学PhD在学中の@inoakioさんが計算してくれた米国州立大学の同様の指標</a>をみてみましょう。順にUniversity of Wisconsin-Madison, Ohaio State University of Minnesota, University of California, Berkeleyです。<a herf="https://www.topuniversities.com/university-rankings/university-subject-rankings/2016/economics-econometrics" target="_blank">2016年のQSランキングのEconomics & Econometrics部門</a>ではそれぞれ48位、51-100位、42位、4位となっていますが、どこも経済学者の間では名門として有名な大学です。
+では海外の、とくに、経済学の本場である米国でのスコアはどのようなものになっているのでしょうか？ここで<a href="https://twitter.com/inoakio/status/824851699042918401" target="_blank">米国経済学PhD在学中の@inoakioさんが計算してくれた米国州立大学の同様の指標</a>をみてみましょう。順にUniversity of Wisconsin-Madison, Ohaio State University, University of Minnesota, University of California, Berkeleyです。<a herf="https://www.topuniversities.com/university-rankings/university-subject-rankings/2016/economics-econometrics" target="_blank">2016年のQSランキングのEconomics & Econometrics部門</a>ではそれぞれ48位、51-100位、42位、4位となっていますが、どこも経済学者の間では名門として有名な大学です。
 
 <center>
 ```{r, results = "asis"}
@@ -229,6 +229,11 @@ htmlTable(
 
 ここまで「日本の(国立)大学」の経済学部の業績を中心に分析してきました。しかし、これでは「日本人研究者」の業績を評価としては不十分です。なぜなら、経済学部は毎年10人以上の海外のトップPhDプログラムに留学生として送り出しており、
 海外で初職を得てそのまま海外に残る人も少なくないからです。<a href="https://sites.google.com/site/economistsjapan/list" target="_blank">大阪大学の安田准教授の調べによれば</a>、現在128名の日本人が海外の研究機関で常勤の職についているようです(ただし、この中には何人かすでに国内の研究機関に移籍している者や日系米国人など日本国籍を所有していない者が含まれています)。次回はこの「海外在住日本人経済学者」たちの業績をみていきます。
+
+## 注釈
+
+この記事を書くために用いたデータとRmdファイルは<a href="https://github.com/kohei-kawaguchi/blog-files" target="_blank">GitHub上で公開</a>しています。結果の複製・拡張などにご自由にご利用ください。分析の誤りなどを発見した場合は著者までご連絡ください。
+
 
 
 
