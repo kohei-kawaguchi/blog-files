@@ -1,0 +1,387 @@
+---
+title: "日本人経済学者の業績比較 2"
+author: "川口康平"
+date: "2017年2月26日"
+output: 
+  prettydoc::html_pretty:
+  theme: cayman
+highlight: github
+---
+  
+```{r setup, include=FALSE}
+library(magrittr)
+library(htmlTable)
+library(foreach)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+Sys.setlocale(category = 'LC_ALL','Japanese_Japan.932')
+setwd("C:/Users/koheiKAWAGUCHI/Dropbox/Projects/blog/_knitr")
+```
+
+
+<a href="http://rpubs.com/mixingale/251962" target="_blank">前回の記事では</a>大阪大学から刊行された「[９大学経済学研究科及び附置研究所の研究業績比較調査（2015年)](http://www.iser.osaka-u.ac.jp/library/dp/2016/DP0974.pdf)」という論文の問題点について議論しました。今回の記事では**阪大論文と同じ指標で海外研究機関に所属する日本人経済学者の業績を評価するとどのような結果になるか**を見ていきます。
+
+海外研究機関に所属する日本人経済学者の業績を評価・把握しておくべき理由は(心情的なナショナリズムを抜きにして)少なくとも三つ挙げられます。
+
+1. **人事戦略上重要**：海外の研究機関に所属する同水準の能力・業績をもつ研究者のなかで日本の大学に移籍してくれる確率が相対的に高い。
+2. **政策立案上重要**: 海外の研究機関に所属する同水準の能力・業績をもつ研究者のなかで日本に関連のある問題に取り組んでくれる確率が相対的に高い。
+3. **大学行政上重要**: 学部まで日本で教育を受けた研究者のうち海外に残って海外の研究機関で研究を続けた人と人と日本に戻った人でセレクション、人的資本蓄積に業績上どのような違いがでるのかについての情報を与えてくれる。
+
+ここではまず<a href="https://sites.google.com/site/economistsjapan/list" target="_blank">大阪大学の安田准教授作成のリスト</a>にもとづいて現時点で海外の研究機関に所属している日本人経済学者の属性などを外観し、次に阪大論文と同じ手法で彼らの業績を評価していきたいと思います。
+
+## 海外在住日本人経済学者(隣接分野含む)のプロフィール
+
+2017年2月26日現在このリストには128名の人物が記されています。ただし、ざっと見た限り、すでに日本に戻っているが散見されます。また、日系米国人のような日本の大学で教育を受けていない方も私の気づいたかぎりでも二人ほど含まれています。さらに、ファイナンス、医療経済学・公衆衛生など、阪大論文の対象となる査読誌では業績を測れないような分野の人も含まれています。しかし、この節ではひとまずリストそのままにプロフィールを見ていきます。
+
+```{r}
+overseas <- readr::read_csv("../knitr_files/blog_post_20170226_files/overseas.csv")
+# count
+Univ <- dplyr::group_by(overseas, Univ) %>% 
+  dplyr::summarise(num = n()) %>%
+  dplyr::mutate(prop = num/sum(num),
+                prop = format(round(prop, 2), 2)) %>%
+  dplyr::arrange(-num)
+Dept <- dplyr::group_by(overseas, Dept) %>% 
+  dplyr::summarise(num = n()) %>%
+  dplyr::mutate(prop = num/sum(num),
+                prop = format(round(prop, 2), 2)) %>%
+  dplyr::arrange(-num)
+Title <- dplyr::group_by(overseas, Title) %>% 
+  dplyr::summarise(num = n()) %>%
+  dplyr::mutate(prop = num/sum(num),
+                prop = format(round(prop, 2), 2)) %>%
+  dplyr::arrange(-num)
+Style <- dplyr::group_by(overseas, Style) %>% 
+  dplyr::summarise(num = n()) %>%
+  dplyr::mutate(prop = num/sum(num),
+                prop = format(round(prop, 2), 2)) %>%
+  dplyr::arrange(-num)
+Field <- dplyr::mutate(overseas, Field = ifelse(Field == "Game", "Micro", Field)) %>%
+  dplyr::group_by(Field) %>% 
+  dplyr::summarise(num = n()) %>%
+  dplyr::mutate(prop = num/sum(num),
+                prop = format(round(prop, 2), 2)) %>%
+  dplyr::arrange(-num)
+YOG <- dplyr::mutate(overseas, 
+                     YOG = as.numeric(YOG),
+                     YOG = ifelse(YOG < 1900, NA, YOG),
+                     YOG = YOG %/% 5,
+                     YOG = YOG*5) %>%
+  dplyr::group_by(YOG) %>% 
+  dplyr::summarise(num = n()) %>%
+  dplyr::mutate(prop = num/sum(num),
+                prop = format(round(prop, 2), 2)) %>%
+  dplyr::arrange(-num)
+YOG <- dplyr::mutate(YOG, YOG = paste(YOG, YOG + 4, sep = "-"),
+                     YOG = gsub("NA-NA", "不明", YOG)) %>%
+  dplyr::arrange(YOG)
+Lct <- dplyr::group_by(overseas, Lct) %>% 
+  dplyr::summarise(num = n()) %>%
+  dplyr::mutate(prop = num/sum(num),
+                prop = format(round(prop, 2), 2)) %>%
+  dplyr::arrange(-num)
+```
+
+
+
+### 地域別人数
+
+```{r}
+prop_english <- dplyr::filter(Lct, Lct != "Euro", Lct != "Asia",
+                              Lct != "Other") %>%
+  dplyr::summarise(prop = sum(as.numeric(prop)))
+```
+
+
+まず地域別に見ると、アメリカ合衆国在住の経済学者が61名で一番多くなっています。UK、豪州、カナダも含めれば海外在住日本人経済学者のうち`r as.numeric(prop_english)*100`%の人が英語圏に住んでいることがわかります。
+
+<center>
+```{r, results = "asis"}
+header <- c("人数", "比率")
+rnames <- c("USA", "UK", "欧州", "豪州", "アジア", "カナダ", "その他")
+htmlTable(
+  x = Lct[, c("num", "prop"), drop = FALSE],
+  header = header,
+  rnames = rnames,
+  caption = "地域別"
+)
+```
+</center>
+
+### 職階別人数
+
+職階別にみると当然のことながら職階が上がるごとに人数が減っています。Associate ProfessorとAssistant Professorの人数の比が1/2程度だというのは意外でした。海外の経済学の初職はほぼテニュア・トラックのAssistant Professorかそれに準ずる職階です。Associate Professorのほとんどはテニュア審査に通ってテニュアを取得した人たちです(もちろんテニュアの付いていないAssociate Professorの人もいますし、そもそも地域によって制度のあり方は少しずつ違います)。ProfessorとAssociate Professorの人数の比も2/3になっています。海外在住日本人経済学者は海外で初職以降もキャリアを形成することに成功しているといえるでしょう。
+
+<center>
+```{r, results = "asis"}
+header <- c("人数", "比率")
+rnames <- c("Assistant Professor", "Associate Professor", "Professor", "Other", "Emeritus")
+htmlTable(
+  x = Title[, c("num", "prop"), drop = FALSE],
+  header = header,
+  rnames = rnames,
+  caption = "職階別"
+)
+```
+</center>
+
+### スタイル・分野別人数
+
+スタイル別にみると、純粋に理論だけをやっている日本人経済学者は全体の45%となっています。分野でみると、ミクロ理論・ゲーム理論の34%が圧倒的なシェア一位となっています。三位の産業経済学は主に実証分析を行う分野ではありますが、他の分野に比べて経済理論的にも計量理論的にも多くの数学を要求される分野です。四位の計量経済学は経済学の計量分析のための手法を開発するための理論分野で、こちらも数学の要求水準の高い分野です。英語でのコミュニケーション能力で劣後する分相対的に優位な分野を選択する学者が多いのだと考えられます。
+
+
+<center>
+```{r, results = "asis"}
+header <- c("人数", "比率")
+rnames <- c("理論", "実証", "両方")
+htmlTable(
+  x = Style[, c("num", "prop"), drop = FALSE],
+  header = header,
+  rnames = rnames,
+  caption = "スタイル別"
+)
+```
+</center>
+<center>
+```{r, results = "asis"}
+header <- c("人数", "比率")
+rnames <- c("ミクロ理論・ゲーム理論", "マクロ経済学", "産業経済学", "計量経済学", "ファイナンス", "労働経済学", "開発経済学", "医療経済学・公衆衛生", "国際経済学", "その他", "行動経済学")
+htmlTable(
+  x = Field[, c("num", "prop"), drop = FALSE],
+  header = header,
+  rnames = rnames,
+  caption = "分野別"
+)
+```
+</center>
+
+### 学部卒年別人数
+
+学部卒年でみると1995年卒以降の3-40代の若手・中堅どころが大部分を占めていることがわかります。ところでこのリストでは学部卒年を記しているのですが、学者のcv調査という意味ではどちらかと言うとPhD取得年の方が大事なのではないかと思います。
+
+<center>
+```{r, results = "asis"}
+header <- c("人数", "比率")
+rnames <- YOG$YOG
+htmlTable(
+  x = YOG[, c("num", "prop"), drop = FALSE],
+  header = header,
+  rnames = rnames,
+  caption = "学部卒年別"
+)
+```
+</center>
+
+
+# 海外在住日本人経済学者の業績
+
+
+この節では阪大論文の手法を用いて海外在住日本人経済学者の業績評価を行います。そのためにいつか条件を置いて対象を絞ります。
+
+1. 阪大論文の対象とする査読誌のリストでは適切に業績を評価できないファイナンス、医療経済学・公衆衛生の人は除く。
+2. 2007年よりあとの人は除く。これは阪大論文が対象とする2015年4月時点でPhD取得をしている見込みがない人を除くため。日本の学部を卒業したあと日本の大学院に二年間通い、その後PhDプログラムに五、六年間通うのが通例となっているため便宜的にこの閾値をとった。
+3. 名誉教授となっている人は除く。
+4. publication listが見つからなかった人は除く。
+5. 日系米国人のエミ・ナカムラ氏は除く。
+
+
+```{r}
+us <- readr::read_csv("../knitr_files/blog_post_20170226_files/us.csv", locale = readr::locale(encoding = "cp932"))
+us <- dplyr::filter(us, YOG <= 2007, Title != "Emer",
+                    Field != "Fin", Field != "Health", Name != "NAKAMURA, Emi", Name != "MIYAZAKI, Hajime",
+                      Name != "ICHIISHI, Tatsuro",
+                      Name != "AMEMIYA, Takeshi",
+                      Name != "HAMADA, Koichi",
+                      Name != "MICHIKO, Ueda",
+                      Name != "YOO, Byung Kwang") %>%
+  dplyr::select(-Top5, -Media) 
+
+
+nonus <- readr::read_csv("../knitr_files/blog_post_20170226_files/nonus.csv", locale = readr::locale(encoding = "cp932"))
+nonus <- dplyr::filter(nonus, YOG <= 2007, Title != "Emer",
+                    Field != "Fin", Field != "Health", Name != "YAMASHITA, Nobu", Name != "YOKOTANI, Akira") %>%
+  dplyr::select(-Top5, -Media)
+us_num_faculty <- length(unique(us$Name))
+nonus_num_faculty <- length(unique(nonus$Name))
+```
+
+その他にも入れるべきか抜くべきか迷うべき方はいるのですが、ひとまずこの基準で対象を選びました。結果として、USA所属の方が,`r us_num_faculty`名、USA以外の地域に所属の方が`r nonus_num_faculty`名の計`r us_num_faculty + nonus_num_faculty`名が対象者として残りました。このリストを対象に阪大論文の方法で業績を評価したものが次の表になります。
+
+```{r}
+# hitotsubashi
+# import journal rank data
+journal_ranks <- readr::read_csv("../knitr_files/blog_post_20170220_files/journal_ranks.csv")
+# import Hitotsubashi faculty data
+data <- readr::read_csv("../knitr_files/blog_post_20170220_files/hitotubashi_contributions.csv",
+                        locale = readr::locale(encoding = "cp932"))
+# filter mainstream faculty
+data <- dplyr::group_by(data, name) %>%
+  dplyr::mutate(major = max(major, na.rm = TRUE)) %>%
+  dplyr::filter(major == 1) %>%
+  dplyr::ungroup()
+data <- dplyr::mutate(data, journal = ifelse(is.na(journal), "none", journal))
+data <- fuzzyjoin::stringdist_left_join(data, journal_ranks, by = "journal", distance_col = "distance")
+data <- dplyr::mutate(data, rank = ifelse(is.na(rank), "none", rank))
+# count the number of mainstream faculty
+num.faculty <- length(unique(data$name))
+# compute the effective number of authors
+data <- dplyr::mutate(data, effective_num = 1/authors,
+                      effective_num = ifelse(journal.x == "none", 0, effective_num))
+# average number of authors
+average_authors <- dplyr::summarise(data, mean(authors, na.rm = TRUE)) %>%
+  as.numeric()
+average_authors <- round(average_authors, 2)
+# summarise data
+data.summary <- dplyr::group_by(data, name, rank) %>%
+  dplyr::summarise(effective_num = sum(effective_num)) %>%
+  dplyr::ungroup()
+header <- expand.grid(unique(data$name), unique(data$rank))
+colnames(header) <- c("name", "rank")
+header <- dplyr::mutate_all(header, dplyr::funs(as.character))
+data.summary <- dplyr::left_join(header, data.summary, by = c("name", "rank")) %>%
+  dplyr::tbl_df()
+data.summary <- dplyr::mutate(data.summary, effective_num = ifelse(is.na(effective_num), 0, effective_num))
+# compute top 20 score
+summary.top20 <- dplyr::filter(data.summary, rank == "top20") %>%
+  dplyr::summarise(total = sum(effective_num),
+                mean = sum(effective_num)/num.faculty,
+                median = quantile(effective_num, 0.5)) %>%
+  dplyr::ungroup()
+# compute top 50 score
+summary.top50 <- dplyr::filter(data.summary, (rank == "top20" | rank == "top50")) %>%
+  dplyr::group_by(name) %>%
+  dplyr::summarise(effective_num = sum(effective_num)) %>%
+  dplyr::ungroup() %>%
+  dplyr::summarise(total = sum(effective_num),
+                mean = sum(effective_num)/num.faculty,
+                median = quantile(effective_num, 0.5)) %>%
+  dplyr::ungroup()
+# compute top 100 score
+summary.top100 <- dplyr::filter(data.summary, (rank == "top20" | rank == "top50" | rank == "top100")) %>%
+  dplyr::group_by(name) %>%
+  dplyr::summarise(effective_num = sum(effective_num)) %>%
+  dplyr::ungroup() %>%
+  dplyr::summarise(total = sum(effective_num),
+                mean = sum(effective_num)/num.faculty,
+                median = quantile(effective_num, 0.5)) %>%
+  dplyr::ungroup()
+# compute top 200 score
+summary.top200 <- dplyr::filter(data.summary, (rank == "top20" | rank == "top50" | rank == "top100" | rank == "top200")) %>%
+  dplyr::group_by(name) %>%
+  dplyr::summarise(effective_num = sum(effective_num)) %>%
+  dplyr::ungroup() %>%
+  dplyr::summarise(total = sum(effective_num),
+                mean = sum(effective_num)/num.faculty,
+                median = quantile(effective_num, 0.5)) %>%
+  dplyr::ungroup()
+table <- cbind(summary.top20, summary.top50, summary.top100, summary.top200)
+table <- as.numeric(table)
+table <- format(round(table, 2), 2)
+table <- t(as.matrix(table))
+table <- cbind(num.faculty, table)
+table_hitotsubashi <- table
+
+# state universities
+table_stateuniversities <- readr::read_csv("../knitr_files/blog_post_20170220_files/stateuniversities_contributions.csv",
+                                           col_names = FALSE)
+table_stateuniversities <- as.matrix(table_stateuniversities)
+colnames(table_stateuniversities) <- c("num.faculty", rep("", dim(table_stateuniversities)[2] - 1))
+```
+
+
+```{r}
+# us and non-us
+# import journal rank data
+journal_ranks <- readr::read_csv("../knitr_files/blog_post_20170220_files/journal_ranks.csv")
+table <- foreach (data = list(us, nonus), .combine = rbind) %do% {
+  # join with journal rank data
+  data <- dplyr::mutate(data, journal = ifelse(is.na(journal), "none", journal))
+  data <- fuzzyjoin::stringdist_left_join(data, journal_ranks, by = "journal", distance_col = "distance", max_dist = 2, ignore_case = TRUE)
+  # count indiviual contributions
+  data <- dplyr::mutate(data, rank = ifelse(is.na(rank), "none", rank))
+  data <- dplyr::mutate(data, effective_num = 1/authors,
+                        effective_num = ifelse(journal.x == "none", 0, effective_num))
+  num.faculty <- length(unique(data$Name))
+  data.summary <- dplyr::group_by(data, Name, rank) %>%
+    dplyr::summarise(effective_num = sum(effective_num)) %>%
+    dplyr::ungroup()
+  header <- expand.grid(unique(data$Name), unique(data$rank))
+  colnames(header) <- c("Name", "rank")
+  header <- dplyr::mutate_all(header, dplyr::funs(as.character))
+  data.summary <- dplyr::left_join(header, data.summary, by = c("Name", "rank")) %>%
+    dplyr::tbl_df()
+  data.summary <- dplyr::mutate(data.summary, effective_num = ifelse(is.na(effective_num), 0, effective_num))
+  
+  summary.top20 <- dplyr::filter(data.summary, rank == "top20") %>%
+    dplyr::summarise(total = sum(effective_num),
+                  mean = sum(effective_num)/num.faculty,
+                  median = quantile(effective_num, 0.5)) %>%
+    dplyr::ungroup()
+  summary.top50 <- dplyr::filter(data.summary, (rank == "top20" | rank == "top50")) %>%
+    dplyr::group_by(Name) %>%
+    dplyr::summarise(effective_num = sum(effective_num)) %>%
+    dplyr::ungroup() %>%
+    dplyr::summarise(total = sum(effective_num),
+                  mean = sum(effective_num)/num.faculty,
+                  median = quantile(effective_num, 0.5)) %>%
+    dplyr::ungroup()
+  summary.top100 <- dplyr::filter(data.summary, (rank == "top20" | rank == "top50" | rank == "top100")) %>%
+    dplyr::group_by(Name) %>%
+    dplyr::summarise(effective_num = sum(effective_num)) %>%
+    dplyr::ungroup() %>%
+    dplyr::summarise(total = sum(effective_num),
+                  mean = sum(effective_num)/num.faculty,
+                  median = quantile(effective_num, 0.5)) %>%
+    dplyr::ungroup()
+  summary.top200 <- dplyr::filter(data.summary, (rank == "top20" | rank == "top50" | rank == "top100" | rank == "top200")) %>%
+    dplyr::group_by(Name) %>%
+    dplyr::summarise(effective_num = sum(effective_num)) %>%
+    dplyr::ungroup() %>%
+    dplyr::summarise(total = sum(effective_num),
+                  mean = sum(effective_num)/num.faculty,
+                  median = quantile(effective_num, 0.5)) %>%
+    dplyr::ungroup()
+  table <- cbind(summary.top20, summary.top50, summary.top100, summary.top200)
+  table <- as.numeric(table)
+  table <- format(round(table, 2), 2)
+  table <- t(as.matrix(table))
+  table <- cbind(num.faculty, table)
+  return(table)
+}
+```
+```{r, results = "asis"}
+table <- rbind(table, table_stateuniversities, table_hitotsubashi)
+table <- t(table)
+colnames(table) <- c("米国所属", "米国以外所属", "UW-Madison", "OSU", "UMN", "UC Berkley", "一橋近経")
+rownames(table) <- c("教員数",
+                     "総数", "一人当たり", "中央値",
+                     "総数", "一人当たり", "中央値",
+                     "総数", "一人当たり", "中央値",
+                     "総数", "一人当たり", "中央値")
+htmlTable(
+  x = table,
+  caption = "国際著名学術誌への論文掲載数： (2006-2015)",
+  n.rgroup = c(1, 3, 3, 3, 3),
+  rgroup = c("",
+             "Top 20",
+             "Top 50",
+             "Top 100",
+             "Top 200")
+)
+```
+
+Top20の一人あたり掲載数で見ると、米国在住日本人経済学者の値が1.40、米国以外在住の日本人経済学者の値が0.69となっています。どちらも一橋大学の近経教員の値を上回っています。日本以外の地域でキャリアを形成している研究者と日本にいる研究者の間で、セレクションあるいは研究環境の違いによって、業績に差が出ていることがわかります。また米国在住の研究者と米国以外の地域にいる研究者でも同様の業績の差があることがわかります。
+
+一方、米国在住の日本人経済学者の業績と米国州立大学の業績を比べると、米国州立大学の業績の方が上回っていることもわかります。ただし、米国に在住している日本人経済学者のうちPhD取得後10年以内の研究者の割合は米国州立大が大学における同様の研究者の割合よりも高くなっていると予想されます。両者の業績の差を適切に評価するためにはPhD取得年度を統制した比較が必要になります。これは今後の課題とします。
+
+
+# 政策的含意
+
+業績の差の一部はそれぞれの地域の研究環境の差に起因するものですが、一部は研究者本人の資質の差に起因します。経済学研究における最も重要な投入物は人的資本です。こうした海外在住の日本人研究者が高い生産性を維持している時期に日本の大学に戻ってもらえるような環境を整えることによって国内の大学の経済学研究科のランキングを上げることができると考えられます。そのためにはまずなにより給与体系を柔軟に設定できるようにすることが必要です。教育・学内業務などの研究以外の業務の負担も、少なくともテニュアトラック期間中は低減することが必要になります。
+
+国外の研究機関に所属する優れた研究者が日本のデータを用いた研究を行いやすい環境を整えることも人材の有効活用という観点から重要だと考えられます。例えば、政府統計の個票申請は、原則として国内の研究機関に所属する研究者が科研費等の政府予算を用いて行う研究についてのみ認められています。こうした政府統計へのアクセス権限を緩和することによって、政策の意思決定に役立つ研究も増えると考えられます。
+
+## 注釈
+
+この記事を書くために用いたデータとRmdファイルは<a href="https://github.com/kohei-kawaguchi/blog-files" target="_blank">GitHub上で公開</a>しています。結果の複製・拡張などにご自由にご利用ください。分析の誤りなどを発見した場合は著者までご連絡ください。
+
+
